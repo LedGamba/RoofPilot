@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+ --rp-orange:#FF6029; --rp-orange-2:#F04E1E; --rp-orange-tint:#FFF1EA; --rp-orange-line:#FFD3C0;
+ --rp-navy:#253043; --rp-navy-2:#3A475E; --rp-navy-tint:#EDF0F4;
+ --bg:#F4F6F8; --surface:#FFFFFF; --surface-2:#F8FAFC;
+ --text:#1E2733; --muted:#69727F; --faint:#98A1AC;
+ --border:#E7EAEF; --border-2:#EEF1F5;
+ --success:#1E9E5A; --success-tint:#E7F6EE; --warn:#E0912F; --info:#3B7BD1;
+ --r-sm:10px; --r:14px; --r-lg:20px; --r-xl:26px;
+ --sh-1:0 1px 2px rgba(16,24,40,.06); --sh-2:0 6px 20px rgba(16,24,40,.09); --sh-3:0 16px 40px rgba(16,24,40,.16);
+ --font:'Plus Jakarta Sans',system-ui,sans-serif; --mono:'DM Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+input,textarea,button{font-family:var(--font);outline:none}
+::-webkit-scrollbar{width:0;height:0}
+@keyframes sheetUp{from{transform:translateY(106%)}to{transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes toastUp{from{transform:translate(-50%,24px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+@keyframes barDown{from{transform:translateY(-12px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes pop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+<div style="height:100%;display:flex;flex-direction:column;background:var(--bg);font-family:var(--font);color:var(--text);position:relative;overflow:hidden">
+
+  <!-- ===== BREADCRUMB / SYSTEM NAV ===== -->
+  <div style="flex:none;padding:52px 14px 10px;background:rgba(244,246,248,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-2);display:flex;align-items:center;gap:9px;z-index:6">
+    <button onClick="{{ goHome }}" title="Home" style="flex:none;width:34px;height:34px;border-radius:11px;border:1px solid var(--border);background:var(--surface);color:var(--rp-navy);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-1);cursor:pointer" style-hover="background:var(--rp-navy-tint)">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.6 12 4l9 6.6"/><path d="M5.4 9.6V20h13.2V9.6"/></svg>
+    </button>
+    <div style="flex:1;min-width:0;display:flex;align-items:center;gap:7px;font-size:13px">
+      <span onClick="{{ goHome }}" style="color:{{ homeColor }};font-weight:{{ homeWeight }};cursor:pointer;white-space:nowrap">Home</span>
+      <sc-if value="{{ notIndex }}">
+        <span style="display:contents">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--faint)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+          <span onClick="{{ goJobs }}" style="color:{{ jobsColor }};font-weight:{{ jobsWeight }};cursor:pointer;white-space:nowrap">Jobs</span>
+        </span>
+      </sc-if>
+      <sc-if value="{{ showLead }}">
+        <span style="display:contents">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--faint)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+          <span onClick="{{ goLead }}" style="color:var(--muted);font-weight:600;cursor:pointer;white-space:nowrap">Lead</span>
+        </span>
+      </sc-if>
+      <sc-if value="{{ showJob }}">
+        <span style="display:contents">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--faint)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+          <span style="color:var(--muted);font-weight:600;white-space:nowrap">Estimating</span>
+        </span>
+      </sc-if>
+      <sc-if value="{{ showLeaf }}">
+        <span style="display:contents">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--faint)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+          <span style="color:var(--text);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ crumbLeaf }}</span>
+        </span>
+      </sc-if>
+    </div>
+    <div style="flex:none;width:34px;height:34px;border-radius:50%;background:var(--rp-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">MW</div>
+  </div>
+
+  <!-- ===== B: inline success banner ===== -->
+  <sc-if value="{{ bannerShow }}">
+    <div style="flex:none;margin:8px 14px 0;padding:11px 13px;border-radius:12px;background:var(--success-tint);border:1px solid #BEE7CE;display:flex;align-items:center;gap:9px;animation:barDown .28s ease;z-index:6">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--success)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.6 2.6L16 9.4"/></svg>
+      <span style="font-size:13px;font-weight:700;color:#12703F">{{ bannerMsg }}</span>
+    </div>
+  </sc-if>
+
+  <!-- ===== SCROLL REGION ===== -->
+  <div style="flex:1;overflow-y:auto;overflow-x:hidden">
+
+    <!-- ============ INDEX / HOME ============ -->
+    <sc-if value="{{ showIndex }}">
+      <div style="padding:20px 18px 40px;display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:9px;background:var(--rp-orange);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(255,96,41,.35)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12 12 5l8 7"/><path d="M6.5 10.5V19h11v-8.5"/></svg>
+          </div>
+          <span style="font-size:19px;font-weight:800;color:var(--rp-navy);letter-spacing:-.3px">RoofPilot</span>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:1.2px;color:var(--rp-orange-2)">PRODUCT DESIGNER CHALLENGE</div>
+          <div style="font-size:27px;font-weight:800;line-height:1.12;color:var(--text);margin-top:8px;letter-spacing:-.5px">The Job page,<br>rethought.</div>
+          <p style="font-size:13.5px;line-height:1.55;color:var(--muted);margin:12px 0 0">Redesign the screen where a roofing salesperson works one storm‑damage job — so they instantly see the status, know the next step, and can act fast with clear confirmation.</p>
+        </div>
+
+        <div style="background:var(--rp-navy);border-radius:var(--r-lg);padding:16px;color:#fff">
+          <div style="font-size:12px;font-weight:800;letter-spacing:.4px;color:rgba(255,255,255,.6);text-transform:uppercase">Try the flow</div>
+          <div style="font-size:12.5px;line-height:1.55;color:rgba(255,255,255,.82);margin-top:9px">Tap <b style="color:#FFB89E">Task</b> in the bottom bar → pick a due date → <b style="color:#FFB89E">Create task</b>. Watch it confirm and land at the top of the list. Also try <b style="color:#fff">Add second contact</b> and tapping any detail to edit it.</div>
+          <div style="font-size:11.5px;line-height:1.5;color:rgba(255,255,255,.55);margin-top:10px">Use the <b style="color:#fff">home</b> icon / breadcrumb to return to this index.</div>
+        </div>
+
+        <button onClick="{{ goJobs }}" style="width:100%;height:52px;border:none;border-radius:15px;background:var(--rp-orange);color:#fff;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 8px 20px rgba(255,96,41,.32);cursor:pointer" style-hover="background:var(--rp-orange-2)">
+          See prototype of Jobs section
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;box-shadow:var(--sh-1)">
+          <div style="font-size:12px;font-weight:800;letter-spacing:.4px;color:var(--faint);text-transform:uppercase">My process</div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
+            <div style="display:flex;gap:11px"><div style="flex:none;width:22px;height:22px;border-radius:50%;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">1</div><div style="font-size:13px;line-height:1.4"><b>Audit the pain.</b> <span style="color:var(--muted)">Unclear next step, buried create‑actions, no feedback.</span></div></div>
+            <div style="display:flex;gap:11px"><div style="flex:none;width:22px;height:22px;border-radius:50%;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">2</div><div style="font-size:13px;line-height:1.4"><b>Anchor on the next step.</b> <span style="color:var(--muted)">A stage tracker + one clear recommended action.</span></div></div>
+            <div style="display:flex;gap:11px"><div style="flex:none;width:22px;height:22px;border-radius:50%;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">3</div><div style="font-size:13px;line-height:1.4"><b>Two directions.</b> <span style="color:var(--muted)">Guided card stack vs. focused dashboard.</span></div></div>
+            <div style="display:flex;gap:11px"><div style="flex:none;width:22px;height:22px;border-radius:50%;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">4</div><div style="font-size:13px;line-height:1.4"><b>Prototype the key flow.</b> <span style="color:var(--muted)">Create a task, start → confirmed.</span></div></div>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;box-shadow:var(--sh-1)">
+          <div style="font-size:12px;font-weight:800;letter-spacing:.4px;color:var(--faint);text-transform:uppercase">Key decisions</div>
+          <div style="display:flex;flex-direction:column;gap:11px;margin-top:12px">
+            <div style="display:flex;gap:9px;font-size:13px;line-height:1.45"><span style="color:var(--rp-orange-2);font-weight:800">→</span><span><b>Stage tracker + one next step.</b> <span style="color:var(--muted)">The page answers "what do I do now?" before anything else.</span></span></div>
+            <div style="display:flex;gap:9px;font-size:13px;line-height:1.45"><span style="color:var(--rp-orange-2);font-weight:800">→</span><span><b>A persistent action bar.</b> <span style="color:var(--muted)">Note · Task · Email · Message are always one tap away.</span></span></div>
+            <div style="display:flex;gap:9px;font-size:13px;line-height:1.45"><span style="color:var(--rp-orange-2);font-weight:800">→</span><span><b>Every action confirms.</b> <span style="color:var(--muted)">A toast or inline banner tells you it worked.</span></span></div>
+            <div style="display:flex;gap:9px;font-size:13px;line-height:1.45"><span style="color:var(--rp-orange-2);font-weight:800">→</span><span><b>Tokenised theme.</b> <span style="color:var(--muted)">Brand colors live in CSS <span style="font-family:var(--mono);font-size:12px">:root</span> variables — restyle from one place.</span></span></div>
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:var(--faint);text-align:center;line-height:1.5">Realistic sample data throughout · Theme driven by CSS <span style="font-family:var(--mono)">:root</span> tokens</div>
+      </div>
+    </sc-if>
+
+    <!-- ============ JOBS PIPELINE ============ -->
+    <sc-if value="{{ showJobs }}">
+      <div style="padding:16px 14px 40px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px">
+          <div style="font-size:22px;font-weight:800;letter-spacing:-.4px">Jobs</div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted)">Pipeline · 11 open</div>
+        </div>
+
+        <!-- LEADS -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-1);overflow:hidden">
+          <button onClick="{{ toggleLeads }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:13px 14px;background:transparent;border:none;cursor:pointer;text-align:left">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--info)"></span>
+            <span style="flex:1;font-size:13.5px;font-weight:800;color:var(--text)">Leads</span>
+            <span style="display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:800;color:var(--success);background:var(--success-tint);padding:2px 8px;border-radius:999px">5%<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="var(--success)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+            <span style="font-size:10px;font-weight:800;color:var(--muted);background:var(--rp-navy-tint);padding:2px 8px;border-radius:999px">6</span>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ leadsCaret }});transition:transform .2s"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+          <sc-if value="{{ leadsOpen }}">
+            <div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:8px">
+              <div onClick="{{ goLead }}" style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2);cursor:pointer" style-hover="border-color:var(--rp-orange-line);background:#fff">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">DW</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:7px">Dana Whitfield<span style="font-size:10px;font-weight:800;color:var(--warn);background:#FEF4E6;border:1px solid #F4DCAF;padding:1px 7px;border-radius:999px">NEW</span></div><div style="font-size:11px;color:var(--muted)">Today, 4:32 PM</div></div>
+                <div style="flex:none;display:flex;align-items:center;gap:6px"><div style="width:22px;height:22px;border-radius:50%;background:var(--rp-navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">MW</div><span style="font-size:11px;font-weight:700;color:var(--muted)">Marcus Webb</span></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2)">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">AS</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:7px">Ava Sinclair<span style="font-size:10px;font-weight:800;color:var(--warn);background:#FEF4E6;border:1px solid #F4DCAF;padding:1px 7px;border-radius:999px">NEW</span></div><div style="font-size:11px;color:var(--muted)">Today, 3:20 PM</div></div>
+                <div style="flex:none;display:flex;align-items:center;gap:6px"><div style="width:22px;height:22px;border-radius:50%;background:var(--rp-navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">MW</div><span style="font-size:11px;font-weight:700;color:var(--muted)">Marcus Webb</span></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2)">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">DM</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:7px">Devon Marsh<span style="font-size:10px;font-weight:800;color:var(--warn);background:#FEF4E6;border:1px solid #F4DCAF;padding:1px 7px;border-radius:999px">NEW</span></div><div style="font-size:11px;color:var(--muted)">Today, 11:48 AM</div></div>
+                <div style="flex:none;display:flex;align-items:center;gap:6px"><div style="width:22px;height:22px;border-radius:50%;background:var(--rp-navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">MW</div><span style="font-size:11px;font-weight:700;color:var(--muted)">Marcus Webb</span></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2)">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">GT</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Gregory Tanaka</div><div style="font-size:11px;color:var(--muted)">Jul 8, 9:30 AM</div></div>
+                <div style="flex:none;display:flex;align-items:center;gap:6px"><div style="width:22px;height:22px;border-radius:50%;background:var(--rp-navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">MW</div><span style="font-size:11px;font-weight:700;color:var(--muted)">Marcus Webb</span></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2)">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">PN</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Priya Nair</div><div style="font-size:11px;color:var(--muted)">Jul 7, 4:15 PM</div></div>
+                <div style="flex:none;display:flex;align-items:center;gap:6px"><div style="width:22px;height:22px;border-radius:50%;background:var(--rp-navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">MW</div><span style="font-size:11px;font-weight:700;color:var(--muted)">Marcus Webb</span></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2)">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">HR</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Hector Ramirez</div><div style="font-size:11px;color:var(--muted)">Jul 6, 1:10 PM</div></div>
+                <div style="flex:none;display:flex;align-items:center;gap:6px"><div style="width:22px;height:22px;border-radius:50%;background:var(--rp-navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">MW</div><span style="font-size:11px;font-weight:700;color:var(--muted)">Marcus Webb</span></div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- ESTIMATING -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-1);overflow:hidden">
+          <button onClick="{{ toggleEstimating }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:13px 14px;background:transparent;border:none;cursor:pointer;text-align:left">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--rp-orange)"></span>
+            <span style="flex:1;font-size:13.5px;font-weight:800;color:var(--text)">Estimating</span>
+            <span style="display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:800;color:var(--success);background:var(--success-tint);padding:2px 8px;border-radius:999px">8%<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="var(--success)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+            <span style="font-size:10px;font-weight:800;color:var(--muted);background:var(--rp-navy-tint);padding:2px 8px;border-radius:999px">4</span>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ estimatingCaret }});transition:transform .2s"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+          <sc-if value="{{ estimatingOpen }}">
+            <div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:8px">
+              <div onClick="{{ goJob }}" style="border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2);padding:12px;cursor:pointer" style-hover="border-color:var(--rp-orange-line);background:#fff">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">DW</div>
+                  <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:800">Dana Whitfield</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">SF‑2291‑0472</div></div>
+                  <span style="flex:none;font-size:10px;font-weight:800;color:var(--warn);background:#FEF4E6;border:1px solid #F4DCAF;padding:2px 8px;border-radius:999px">2 tasks left</span>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+                  <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:var(--rp-orange-2);background:#fff;border:1px solid var(--border);padding:3px 9px;border-radius:999px"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>Due in 2 days</span>
+                  <span style="font-size:11px;font-weight:700;color:var(--text);background:#fff;border:1px solid var(--border);padding:3px 9px;border-radius:999px">Arch. asphalt</span>
+                  <span style="font-size:11px;font-weight:700;color:var(--text);background:#fff;border:1px solid var(--border);padding:3px 9px;border-radius:999px">State Farm</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:11px;padding-top:10px;border-top:1px solid var(--border-2)"><div style="width:22px;height:22px;border-radius:50%;background:var(--rp-navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">MW</div><span style="font-size:11px;font-weight:700;color:var(--muted)">Marcus Webb</span><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--rp-orange-2)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left:auto"><path d="m9 6 6 6-6 6"/></svg></div>
+              </div>
+              <div style="border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2);padding:12px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">RA</div>
+                  <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Roberto Alvarez</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">ASF‑8830‑1194</div></div>
+                  <span style="flex:none;font-size:10px;font-weight:800;color:var(--warn);background:#FEF4E6;border:1px solid #F4DCAF;padding:2px 8px;border-radius:999px">1 task left</span>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+                  <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:var(--muted);background:#fff;border:1px solid var(--border);padding:3px 9px;border-radius:999px"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>Due in 5 days</span>
+                  <span style="font-size:11px;font-weight:700;color:var(--text);background:#fff;border:1px solid var(--border);padding:3px 9px;border-radius:999px">Standing seam metal</span>
+                  <span style="font-size:11px;font-weight:700;color:var(--text);background:#fff;border:1px solid var(--border);padding:3px 9px;border-radius:999px">Allstate</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:11px;padding-top:10px;border-top:1px solid var(--border-2)"><div style="width:22px;height:22px;border-radius:50%;background:var(--rp-navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">MW</div><span style="font-size:11px;font-weight:700;color:var(--muted)">Marcus Webb</span></div>
+              </div>
+              <div style="border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2);padding:12px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">NR</div>
+                  <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Nguyen Residence</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">FRM‑5521‑0083</div></div>
+                  <span style="flex:none;font-size:10px;font-weight:800;color:var(--warn);background:#FEF4E6;border:1px solid #F4DCAF;padding:2px 8px;border-radius:999px">3 tasks left</span>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+                  <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:var(--muted);background:#fff;border:1px solid var(--border);padding:3px 9px;border-radius:999px"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>Due in 4 days</span>
+                  <span style="font-size:11px;font-weight:700;color:var(--text);background:#fff;border:1px solid var(--border);padding:3px 9px;border-radius:999px">Arch. asphalt</span>
+                  <span style="font-size:11px;font-weight:700;color:var(--text);background:#fff;border:1px solid var(--border);padding:3px 9px;border-radius:999px">Farmers</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:11px;padding-top:10px;border-top:1px solid var(--border-2)"><div style="width:22px;height:22px;border-radius:50%;background:var(--rp-navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">MW</div><span style="font-size:11px;font-weight:700;color:var(--muted)">Marcus Webb</span></div>
+              </div>
+              <div style="border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2);padding:12px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">CP</div>
+                  <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Coleman Property</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">USAA‑7742‑0356</div></div>
+                  <span style="flex:none;font-size:10px;font-weight:800;color:var(--warn);background:#FEF4E6;border:1px solid #F4DCAF;padding:2px 8px;border-radius:999px">2 tasks left</span>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+                  <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:var(--muted);background:#fff;border:1px solid var(--border);padding:3px 9px;border-radius:999px"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>Due in 6 days</span>
+                  <span style="font-size:11px;font-weight:700;color:var(--text);background:#fff;border:1px solid var(--border);padding:3px 9px;border-radius:999px">Tile</span>
+                  <span style="font-size:11px;font-weight:700;color:var(--text);background:#fff;border:1px solid var(--border);padding:3px 9px;border-radius:999px">USAA</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:11px;padding-top:10px;border-top:1px solid var(--border-2)"><div style="width:22px;height:22px;border-radius:50%;background:var(--rp-navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">SW</div><span style="font-size:11px;font-weight:700;color:var(--muted)">Sam Wallis</span></div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- SOLD -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-1);overflow:hidden">
+          <button onClick="{{ toggleSold }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:13px 14px;background:transparent;border:none;cursor:pointer;text-align:left">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--success)"></span>
+            <span style="flex:1;font-size:13.5px;font-weight:800;color:var(--text)">Sold</span>
+            <span style="display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:800;color:var(--success);background:var(--success-tint);padding:2px 8px;border-radius:999px">3%<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="var(--success)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+            <span style="font-size:10px;font-weight:800;color:var(--muted);background:var(--rp-navy-tint);padding:2px 8px;border-radius:999px">2</span>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ soldCaret }});transition:transform .2s"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+          <sc-if value="{{ soldOpen }}">
+            <div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2)">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">MD</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Marcus Delgado</div><div style="font-size:11px;color:var(--muted)">Signed Jul 3 · <b style="color:var(--success)">$21,300</b></div></div>
+                <div style="width:22px;height:22px;border-radius:50%;background:var(--rp-navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">MW</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2)">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">RF</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Reeves Family</div><div style="font-size:11px;color:var(--muted)">Signed Jul 1 · <b style="color:var(--success)">$16,800</b></div></div>
+                <div style="width:22px;height:22px;border-radius:50%;background:var(--rp-navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">SW</div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- IN PRODUCTION -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-1);overflow:hidden">
+          <button onClick="{{ toggleProduction }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:13px 14px;background:transparent;border:none;cursor:pointer;text-align:left">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--rp-navy)"></span>
+            <span style="flex:1;font-size:13.5px;font-weight:800;color:var(--text)">In production</span>
+            <span style="display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:800;color:var(--success);background:var(--success-tint);padding:2px 8px;border-radius:999px">2%<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="var(--success)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+            <span style="font-size:10px;font-weight:800;color:var(--muted);background:var(--rp-navy-tint);padding:2px 8px;border-radius:999px">2</span>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ productionCaret }});transition:transform .2s"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+          <sc-if value="{{ productionOpen }}">
+            <div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2)">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">OR</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Okafor Residence</div><div style="font-size:11px;color:var(--muted)">Crew A · starts Jul 14</div></div>
+                <span style="font-size:10px;font-weight:800;color:var(--info);background:#EAF1FB;padding:2px 8px;border-radius:999px">Scheduled</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2)">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">BH</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Bennett Home</div><div style="font-size:11px;color:var(--muted)">Crew B · in progress</div></div>
+                <span style="font-size:10px;font-weight:800;color:var(--warn);background:#FEF4E6;padding:2px 8px;border-radius:999px">On roof</span>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- ACCOUNTS RECEIVABLE -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-1);overflow:hidden">
+          <button onClick="{{ toggleAr }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:13px 14px;background:transparent;border:none;cursor:pointer;text-align:left">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--warn)"></span>
+            <span style="flex:1;font-size:13.5px;font-weight:800;color:var(--text)">Accounts receivable</span>
+            <span style="display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:800;color:var(--success);background:var(--success-tint);padding:2px 8px;border-radius:999px">4%<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="var(--success)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+            <span style="font-size:10px;font-weight:800;color:var(--muted);background:var(--rp-navy-tint);padding:2px 8px;border-radius:999px">2</span>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ arCaret }});transition:transform .2s"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+          <sc-if value="{{ arOpen }}">
+            <div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2)">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">SL</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Sandra Liu</div><div style="font-size:11px;color:var(--muted)">INV‑2043 · <b style="color:var(--warn)">$8,450 due</b></div></div>
+                <span style="font-size:10px;font-weight:800;color:var(--warn);background:#FEF4E6;padding:2px 8px;border-radius:999px">14d</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2)">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--rp-navy);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">TB</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Tyrell Brooks</div><div style="font-size:11px;color:var(--muted)">INV‑2039 · <b style="color:var(--danger)">$3,200 overdue</b></div></div>
+                <span style="font-size:10px;font-weight:800;color:var(--danger);background:#FDECEC;padding:2px 8px;border-radius:999px">6d late</span>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- COMPLETED -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-1);overflow:hidden">
+          <button onClick="{{ toggleCompleted }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:13px 14px;background:transparent;border:none;cursor:pointer;text-align:left">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--success)"></span>
+            <span style="flex:1;font-size:13.5px;font-weight:800;color:var(--text)">Completed</span>
+            <span style="display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:800;color:var(--success);background:var(--success-tint);padding:2px 8px;border-radius:999px">6%<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="var(--success)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+            <span style="font-size:10px;font-weight:800;color:var(--muted);background:var(--rp-navy-tint);padding:2px 8px;border-radius:999px">1</span>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ completedCaret }});transition:transform .2s"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+          <sc-if value="{{ completedOpen }}">
+            <div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2)">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--success-tint);color:var(--success);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">HR</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Harmon Residence</div><div style="font-size:11px;color:var(--muted)">Closed Jun 30 · $19,100 · paid</div></div>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--success)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.6 2.6L16 9.4"/></svg>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- ARCHIVE -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-1);overflow:hidden">
+          <button onClick="{{ toggleArchive }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:13px 14px;background:transparent;border:none;cursor:pointer;text-align:left">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--faint)"></span>
+            <span style="flex:1;font-size:13.5px;font-weight:800;color:var(--text)">Archive</span>
+            <span style="display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:800;color:var(--faint);background:var(--rp-navy-tint);padding:2px 8px;border-radius:999px">1%<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="var(--faint)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7 17 17M9 17h8v-8"/></svg></span>
+            <span style="font-size:10px;font-weight:800;color:var(--muted);background:var(--rp-navy-tint);padding:2px 8px;border-radius:999px">1</span>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ archiveCaret }});transition:transform .2s"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+          <sc-if value="{{ archiveOpen }}">
+            <div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2);opacity:.72">
+                <div style="flex:none;width:36px;height:36px;border-radius:10px;background:var(--rp-navy-tint);color:var(--faint);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center">VP</div>
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">Vance Property</div><div style="font-size:11px;color:var(--muted)">Lost to competitor · Jun 12</div></div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+
+      </div>
+    </sc-if>
+
+    <!-- ============ LEAD FORM ============ -->
+    <sc-if value="{{ showLead }}">
+      <div style="padding:0 0 40px;display:flex;flex-direction:column">
+        <div style="background:var(--rp-navy);color:#fff;padding:16px 16px 18px;border-radius:0 0 24px 24px">
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="flex:1;min-width:0"><div style="font-size:22px;font-weight:800;letter-spacing:-.4px">Dana Whitfield</div><div style="font-size:12.5px;color:rgba(255,255,255,.66);margin-top:2px">2841 Oakmont Dr, Charlotte NC 28277</div></div>
+            <div style="flex:none;padding:5px 11px;border-radius:999px;background:rgba(255,96,41,.18);color:#FFB89E;font-size:11px;font-weight:800;white-space:nowrap">Status: 1/6 Lead</div>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:10px">Received today, 4:32 PM · via Storm canvass</div>
+        </div>
+
+        <div style="padding:14px 16px 0;display:flex;flex-direction:column;gap:12px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px;box-shadow:var(--sh-1)">
+            <div style="font-size:12px;font-weight:800;letter-spacing:.3px;color:var(--faint);text-transform:uppercase;margin-bottom:12px">Lead form · prefilled</div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <div><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">JOB NAME</div><input readonly value="Dana Whitfield" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+              <div style="display:flex;gap:10px"><div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">PHONE</div><input readonly value="(704) 555-0148" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)"></div><div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">DEDUCTIBLE</div><input readonly value="$2,500" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)"></div></div>
+              <div><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">EMAIL</div><input readonly value="dana.whitfield@gmail.com" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+              <div><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">PROPERTY ADDRESS</div><input readonly value="2841 Oakmont Dr, Charlotte NC 28277" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+              <div><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">CLAIM CODE</div><input readonly value="SF-2291-0472" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text);font-family:var(--mono)"></div>
+              <div style="display:flex;gap:10px"><div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">ROOF TYPE</div><input readonly value="Architectural asphalt" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)"></div><div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">INSURANCE</div><input readonly value="State Farm" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)"></div></div>
+              <div style="display:flex;gap:10px"><div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">ROOF SIZE</div><input readonly value="28 sq · 2,800 ft²" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)"></div><div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">PITCH</div><input readonly value="6/12" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)"></div></div>
+              <div><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">ASSIGNED</div><input readonly value="Marcus Webb" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+            </div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px;box-shadow:var(--sh-1)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <span style="font-size:12px;font-weight:800;letter-spacing:.3px;color:var(--faint);text-transform:uppercase">Damage photos</span>
+              <span style="font-size:11px;font-weight:700;color:var(--faint)">{{ photoCount }}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <sc-for list="{{ photos }}" as="p" hint-placeholder-count="4">
+                <div onMouseEnter="{{ p.onEnter }}" onMouseLeave="{{ p.onLeave }}" style="position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid var(--border-2)">
+                  <img src="{{ p.src }}" style="width:100%;height:100%;object-fit:cover;display:block">
+                  <sc-if value="{{ p.hovered }}">
+                    <div style="position:absolute;inset:0;background:rgba(20,26,34,.5);display:flex;align-items:center;justify-content:center;animation:fadeIn .15s ease">
+                      <button onClick="{{ p.onDelete }}" title="Delete photo" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--danger);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+              <button onClick="{{ uploadPhoto }}" style="aspect-ratio:4/3;border:1.5px dashed var(--rp-orange-line);border-radius:12px;background:var(--rp-orange-tint);color:var(--rp-orange-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer" style-hover="background:#FFE7DA">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                <span style="font-size:11px;font-weight:800">Upload</span>
+              </button>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button onClick="{{ goJobs }}" style="flex:none;padding:0 22px;height:50px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--rp-navy);font-size:15px;font-weight:700;cursor:pointer" style-hover="background:var(--rp-navy-tint)">Back</button>
+            <button onClick="{{ openSaveConfirm }}" style="flex:1;height:50px;border:none;border-radius:14px;background:var(--rp-navy);color:#fff;font-size:15px;font-weight:800;cursor:pointer" style-hover="background:var(--rp-navy-2)">Save</button>
+          </div>
+          <button onClick="{{ openStageConfirm }}" style="margin-top:10px;width:100%;height:50px;border:none;border-radius:14px;background:var(--rp-orange);color:#fff;display:flex;align-items:center;gap:11px;padding:0 14px;cursor:pointer;text-align:left" style-hover="background:var(--rp-orange-2)">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12z"/></svg>
+            <span style="flex:1"><span style="display:block;font-size:9px;font-weight:800;letter-spacing:.6px;opacity:.85">NEXT ACTION</span><span style="display:block;font-size:14px;font-weight:800">Send to Estimation</span></span>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ JOB — DIRECTION A ============ -->
+    <sc-if value="{{ showJobA }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:14px 14px 128px;display:flex;flex-direction:column;gap:13px">
+
+        <!-- header + stepper -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;box-shadow:var(--sh-1)">
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="flex:none;width:44px;height:44px;border-radius:13px;background:var(--rp-orange-tint);color:var(--rp-orange-2);font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center">DW</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:18px;font-weight:800;letter-spacing:-.3px">Dana Whitfield</div>
+              <div style="font-size:12.5px;color:var(--muted);margin-top:1px">2841 Oakmont Dr, Charlotte NC</div>
+            </div>
+            <div style="flex:none;padding:5px 10px;border-radius:999px;background:var(--rp-orange-tint);color:var(--rp-orange-2);font-size:11px;font-weight:800">Estimate</div>
+          </div>
+          <div style="position:relative;margin-top:16px;padding:0 4px">
+            <div style="position:absolute;left:22px;right:22px;top:8px;height:2px;background:var(--border)"></div>
+            <div style="position:absolute;left:22px;top:8px;height:2px;width:33%;background:var(--rp-orange)"></div>
+            <div style="position:relative;display:flex;justify-content:space-between">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><div style="width:18px;height:18px;border-radius:50%;background:var(--rp-orange);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4 10-11"/></svg></div><span style="font-size:9px;font-weight:600;color:var(--faint)">Lead</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><div style="width:18px;height:18px;border-radius:50%;background:var(--rp-orange);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4 10-11"/></svg></div><span style="font-size:9px;font-weight:600;color:var(--faint)">Inspect</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><div style="width:18px;height:18px;border-radius:50%;background:var(--surface);border:3px solid var(--rp-orange);box-shadow:0 0 0 3px var(--rp-orange-tint)"></div><span style="font-size:9px;font-weight:800;color:var(--rp-navy)">Estimate</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><div style="width:14px;height:14px;border-radius:50%;background:var(--surface);border:2px solid var(--border);margin-top:2px"></div><span style="font-size:9px;font-weight:600;color:var(--faint)">Proposal</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><div style="width:14px;height:14px;border-radius:50%;background:var(--surface);border:2px solid var(--border);margin-top:2px"></div><span style="font-size:9px;font-weight:600;color:var(--faint)">Build</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><div style="width:14px;height:14px;border-radius:50%;background:var(--surface);border:2px solid var(--border);margin-top:2px"></div><span style="font-size:9px;font-weight:600;color:var(--faint)">Invoice</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- next step -->
+        <div style="background:var(--rp-orange-tint);border:1px solid var(--rp-orange-line);border-radius:var(--r-lg);padding:15px">
+          <div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--rp-orange-2);text-transform:uppercase">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12z"/></svg>
+            Next step
+          </div>
+          <div style="font-size:16px;font-weight:800;margin-top:7px;color:var(--text)">Send the proposal</div>
+          <div style="font-size:12.5px;line-height:1.5;color:#8A5642;margin-top:3px">Adjuster approved the scope. Build Dana's proposal from the $18,450 estimate and send for e‑signature.</div>
+          <button onClick="{{ onNext }}" style="margin-top:12px;height:42px;padding:0 16px;border:none;border-radius:12px;background:var(--rp-navy);color:#fff;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:7px;cursor:pointer" style-hover="background:var(--rp-navy-2)">
+            Start proposal
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+
+        <!-- contacts -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;box-shadow:var(--sh-1)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
+            <span style="font-size:14px;font-weight:800">Contacts</span>
+            <span style="font-size:11px;font-weight:700;color:var(--faint)">{{ contactCount }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ contacts }}" as="c" hint-placeholder-count="1">
+              <div style="display:flex;align-items:center;gap:11px">
+                <div style="flex:none;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:{{ c.tintBg }};color:{{ c.tintFg }}">{{ c.initials }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:6px">{{ c.name }}<sc-if value="{{ c.primary }}"><span style="font-size:9px;font-weight:800;color:var(--rp-orange-2);background:var(--rp-orange-tint);padding:1px 6px;border-radius:5px">PRIMARY</span></sc-if></div>
+                  <div style="font-size:11.5px;color:var(--muted)">{{ c.role }} · {{ c.phone }}</div>
+                </div>
+                <button onClick="{{ c.onCall }}" style="flex:none;width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--rp-navy);display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--rp-navy-tint)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h3l2 5-2.2 1.1a12 12 0 0 0 5 5L16 12l5 2v3a2 2 0 0 1-2.2 2A16 16 0 0 1 4 5.2 2 2 0 0 1 6 3Z"/></svg></button>
+                <button onClick="{{ c.onText }}" style="flex:none;width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--rp-navy);display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--rp-navy-tint)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.4 7.2L4 21l1.9-5.3A8 8 0 1 1 21 12Z"/></svg></button>
+              </div>
+            </sc-for>
+          </div>
+          <button onClick="{{ openAddContact }}" style="margin-top:12px;width:100%;height:42px;border:1.5px dashed var(--rp-orange-line);border-radius:12px;background:transparent;color:var(--rp-orange-2);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer" style-hover="background:var(--rp-orange-tint)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            {{ addContactLabel }}
+          </button>
+        </div>
+
+        <!-- job details -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;box-shadow:var(--sh-1)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <span style="font-size:14px;font-weight:800">Job details</span>
+            <span style="font-size:11px;font-weight:700;color:var(--faint)">Tap to edit</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+            <div onClick="{{ editRoofType }}" style="border:1px solid var(--border-2);border-radius:12px;padding:10px;cursor:pointer" style-hover="border-color:var(--rp-orange-line);background:var(--surface-2)"><div style="display:flex;align-items:center;gap:6px;color:var(--faint)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 4 8 4-8 4-8-4 8-4Z"/><path d="m4 12 8 4 8-4"/></svg><span style="font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase">Roof type</span></div><div style="font-size:13px;font-weight:700;margin-top:5px">{{ roofTypeVal }}</div></div>
+            <div onClick="{{ editInsurer }}" style="border:1px solid var(--border-2);border-radius:12px;padding:10px;cursor:pointer" style-hover="border-color:var(--rp-orange-line);background:var(--surface-2)"><div style="display:flex;align-items:center;gap:6px;color:var(--faint)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3Z"/></svg><span style="font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase">Insurance</span></div><div style="font-size:13px;font-weight:700;margin-top:5px">{{ insurerVal }}</div></div>
+            <div onClick="{{ editClaim }}" style="border:1px solid var(--border-2);border-radius:12px;padding:10px;cursor:pointer" style-hover="border-color:var(--rp-orange-line);background:var(--surface-2)"><div style="display:flex;align-items:center;gap:6px;color:var(--faint)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16"/></svg><span style="font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase">Claim #</span></div><div style="font-size:13px;font-weight:700;margin-top:5px;font-family:var(--mono)">{{ claimVal }}</div></div>
+            <div onClick="{{ editDeductible }}" style="border:1px solid var(--border-2);border-radius:12px;padding:10px;cursor:pointer" style-hover="border-color:var(--rp-orange-line);background:var(--surface-2)"><div style="display:flex;align-items:center;gap:6px;color:var(--faint)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 7.5c0-1.7 1.8-3 4-3s4 1.3 4 3-1.8 3-4 3-4 1.3-4 3 1.8 3 4 3 4-1.3 4-3"/></svg><span style="font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase">Deductible</span></div><div style="font-size:13px;font-weight:700;margin-top:5px">{{ deductibleVal }}</div></div>
+            <div onClick="{{ editSize }}" style="border:1px solid var(--border-2);border-radius:12px;padding:10px;cursor:pointer" style-hover="border-color:var(--rp-orange-line);background:var(--surface-2)"><div style="display:flex;align-items:center;gap:6px;color:var(--faint)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="1.5"/><path d="M7 8v3M11 8v4M15 8v3"/></svg><span style="font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase">Roof size</span></div><div style="font-size:13px;font-weight:700;margin-top:5px">{{ sizeVal }}</div></div>
+            <div onClick="{{ editPitch }}" style="border:1px solid var(--border-2);border-radius:12px;padding:10px;cursor:pointer" style-hover="border-color:var(--rp-orange-line);background:var(--surface-2)"><div style="display:flex;align-items:center;gap:6px;color:var(--faint)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16M4 18 18 6"/></svg><span style="font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase">Pitch</span></div><div style="font-size:13px;font-weight:700;margin-top:5px">{{ pitchVal }}</div></div>
+          </div>
+        </div>
+
+        <!-- estimate -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;box-shadow:var(--sh-1);display:flex;align-items:center;gap:13px">
+          <div style="flex:1"><div style="font-size:11px;font-weight:700;letter-spacing:.3px;color:var(--faint);text-transform:uppercase">Estimate</div><div style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-top:2px">$18,450</div><div style="font-size:11.5px;color:var(--warn);font-weight:700;margin-top:1px">Draft ready — not sent</div></div>
+          <button onClick="{{ onViewEstimate }}" style="flex:none;height:38px;padding:0 15px;border:1px solid var(--border);border-radius:11px;background:var(--surface-2);color:var(--rp-navy);font-size:12.5px;font-weight:700;cursor:pointer" style-hover="background:var(--rp-navy-tint)">View</button>
+        </div>
+
+        <!-- tasks -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;box-shadow:var(--sh-1)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
+            <span style="font-size:14px;font-weight:800">Tasks</span>
+            <span style="font-size:10px;font-weight:800;color:var(--rp-navy);background:var(--rp-navy-tint);padding:2px 8px;border-radius:999px">{{ openCount }} open</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ tasks }}" as="t" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:11px;padding:8px 8px;border-radius:10px;background:{{ t.rowBg }};border:1px solid {{ t.rowBorder }}">
+                <button onClick="{{ t.onToggle }}" style="flex:none;width:22px;height:22px;border-radius:7px;border:2px solid {{ t.boxBorder }};background:{{ t.boxBg }};display:flex;align-items:center;justify-content:center;cursor:pointer"><sc-if value="{{ t.done }}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4 10-11"/></svg></sc-if></button>
+                <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:{{ t.titleColor }};text-decoration:{{ t.strike }}">{{ t.title }}</div><div style="font-size:11px;color:var(--muted);margin-top:1px">{{ t.due }} · {{ t.assignee }}</div></div>
+                <sc-if value="{{ t.fresh }}"><span style="flex:none;font-size:9px;font-weight:800;color:var(--rp-orange-2);background:var(--rp-orange-tint);padding:2px 7px;border-radius:6px;animation:pop .3s ease">NEW</span></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- activity -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;box-shadow:var(--sh-1)">
+          <div style="font-size:14px;font-weight:800;margin-bottom:12px">Activity</div>
+          <div style="display:flex;flex-direction:column;gap:0">
+            <sc-for list="{{ feed }}" as="f" hint-placeholder-count="2">
+              <div style="display:flex;gap:11px;padding-bottom:13px">
+                <div style="flex:none;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:9px;height:9px;border-radius:50%;background:{{ f.dot }};margin-top:3px"></div><div style="flex:1;width:2px;background:var(--border-2)"></div></div>
+                <div style="flex:1;min-width:0;padding-bottom:2px"><div style="font-size:10px;font-weight:800;letter-spacing:.3px;color:var(--faint);text-transform:uppercase">{{ f.tag }}</div><div style="font-size:12.5px;line-height:1.45;margin-top:3px;color:var(--text)">{{ f.title }}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">{{ f.meta }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ JOB — DIRECTION B ============ -->
+    <sc-if value="{{ showJobB }}">
+      <div style="padding:0 0 128px;display:flex;flex-direction:column">
+        <!-- navy hero -->
+        <div style="background:var(--rp-navy);color:#fff;padding:16px 16px 18px;border-radius:0 0 24px 24px">
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:22px;font-weight:800;letter-spacing:-.4px">Dana Whitfield</div>
+              <div style="font-size:12.5px;color:rgba(255,255,255,.66);margin-top:2px">2841 Oakmont Dr, Charlotte NC 28277</div>
+            </div>
+            <div style="flex:none;padding:5px 11px;border-radius:999px;background:rgba(255,96,41,.18);color:#FFB89E;font-size:11px;font-weight:800;white-space:nowrap">Status: 2/6 Estimating</div>
+          </div>
+        </div>
+
+        <!-- tabs -->
+        <div style="position:sticky;top:0;z-index:4;background:var(--bg);padding:12px 16px 8px">
+          <div style="display:flex;background:var(--rp-navy-tint);border-radius:12px;padding:4px">
+            <button onClick="{{ setActivity }}" style="flex:1;height:34px;border:none;border-radius:9px;font-size:12.5px;font-weight:800;cursor:pointer;background:{{ tabActivityBg }};color:{{ tabActivityFg }};box-shadow:{{ tabActivitySh }}">Activity</button>
+            <button onClick="{{ setOverview }}" style="flex:1;height:34px;border:none;border-radius:9px;font-size:12.5px;font-weight:800;cursor:pointer;background:{{ tabOverviewBg }};color:{{ tabOverviewFg }};box-shadow:{{ tabOverviewSh }}">Overview</button>
+          </div>
+        </div>
+
+        <!-- OVERVIEW -->
+        <sc-if value="{{ isOverview }}">
+          <div style="padding:4px 16px 0;display:flex;flex-direction:column;gap:12px">
+            <!-- job overview -->
+            <div onClick="{{ openOverviewEdit }}" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;box-shadow:var(--sh-1);cursor:pointer" style-hover="border-color:var(--rp-orange-line)">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                <span style="font-size:14px;font-weight:800">Job overview</span>
+                <span style="font-size:11px;font-weight:700;color:var(--faint)">Tap to edit</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+                <div style="border:1px solid var(--border-2);border-radius:12px;padding:10px"><div style="display:flex;align-items:center;gap:6px;color:var(--faint)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 7.5c0-1.7 1.8-3 4-3s4 1.3 4 3-1.8 3-4 3-4 1.3-4 3 1.8 3 4 3 4-1.3 4-3"/></svg><span style="font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase">Estimate</span></div><div style="font-size:13px;font-weight:700;margin-top:5px">{{ ovEstimate }}</div></div>
+                <div style="border:1px solid var(--border-2);border-radius:12px;padding:10px"><div style="display:flex;align-items:center;gap:6px;color:var(--faint)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z"/><path d="M9 8h6M9 12h6"/></svg><span style="font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase">Deductible</span></div><div style="font-size:13px;font-weight:700;margin-top:5px">{{ ovDeductible }}</div></div>
+                <div style="border:1px solid var(--border-2);border-radius:12px;padding:10px"><div style="display:flex;align-items:center;gap:6px;color:var(--faint)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="1.5"/><path d="M7 8v3M11 8v4M15 8v3"/></svg><span style="font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase">Roof</span></div><div style="font-size:13px;font-weight:700;margin-top:5px">{{ ovRoof }}</div></div>
+                <div style="border:1px solid var(--border-2);border-radius:12px;padding:10px"><div style="display:flex;align-items:center;gap:6px;color:var(--faint)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 4 8 4-8 4-8-4 8-4Z"/><path d="m4 12 8 4 8-4"/></svg><span style="font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase">Roof type</span></div><div style="font-size:13px;font-weight:700;margin-top:5px">{{ ovRoofType }}</div></div>
+                <div style="border:1px solid var(--border-2);border-radius:12px;padding:10px"><div style="display:flex;align-items:center;gap:6px;color:var(--faint)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3Z"/></svg><span style="font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase">Insurance</span></div><div style="font-size:13px;font-weight:700;margin-top:5px">{{ ovInsurance }}</div></div>
+                <div style="border:1px solid var(--border-2);border-radius:12px;padding:10px"><div style="display:flex;align-items:center;gap:6px;color:var(--faint)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16"/></svg><span style="font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase">Claim</span></div><div style="font-size:13px;font-weight:700;margin-top:5px;font-family:var(--mono)">{{ ovClaim }}</div></div>
+              </div>
+            </div>
+            <!-- job details (Direction A style) -->
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:6px 15px 8px;box-shadow:var(--sh-1)">
+              <div style="font-size:14px;font-weight:800;padding:10px 0 4px">Job details</div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border-2)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><span style="flex:1;font-size:12.5px;color:var(--muted)">Status</span><span style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:var(--rp-orange-2)">Estimating<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border-2)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 11 3l10 10-8 8z"/><circle cx="8" cy="8" r="1.3"/></svg><span style="flex:1;font-size:12.5px;color:var(--muted)">Type</span><span style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700">Insurance<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--faint)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border-2)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5H5V6h5"/></svg><span style="flex:1;font-size:12.5px;color:var(--muted)">Lead source</span><span style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700">Storm canvass<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--faint)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border-2)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><span style="flex:1;font-size:12.5px;color:var(--muted)">Assigned</span><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;background:var(--rp-navy-tint);font-size:12px;font-weight:700">Marcus Webb</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border-2)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg><span style="flex:1;font-size:12.5px;color:var(--muted)">Location</span><span style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700">Summit Ridge Roofing<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--faint)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border-2)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3.5"/><circle cx="12" cy="10" r="2.4"/><path d="M8 17a4 4 0 0 1 8 0"/></svg><span style="flex:1;font-size:12.5px;color:var(--muted)">Sales rep</span><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;background:var(--rp-navy-tint);font-size:12px;font-weight:700">Marcus Webb</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:11px 0"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.2a3 3 0 0 1 0 5.6"/><path d="M18.5 20a6 6 0 0 0-3-5.2"/></svg><span style="flex:1;font-size:12.5px;color:var(--muted)">Subcontractors</span><span style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--faint)">Add subcontractor<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--rp-orange-2)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span></div>
+            </div>
+
+            <!-- contacts moved above details -->
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--sh-1)">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px"><span style="font-size:14px;font-weight:800">Contacts</span><span style="font-size:11px;font-weight:700;color:var(--faint)">{{ contactCount }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ contacts }}" as="c" hint-placeholder-count="1">
+                  <div style="display:flex;align-items:center;gap:11px">
+                    <div style="flex:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;background:{{ c.tintBg }};color:{{ c.tintFg }}">{{ c.initials }}</div>
+                    <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">{{ c.name }}</div><div style="font-size:11px;color:var(--muted)">{{ c.role }}</div></div>
+                    <button onClick="{{ c.onCall }}" style="flex:none;width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--rp-navy);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h3l2 5-2.2 1.1a12 12 0 0 0 5 5L16 12l5 2v3a2 2 0 0 1-2.2 2A16 16 0 0 1 4 5.2 2 2 0 0 1 6 3Z"/></svg></button>
+                    <button onClick="{{ c.onText }}" style="flex:none;width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--rp-navy);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.4 7.2L4 21l1.9-5.3A8 8 0 1 1 21 12Z"/></svg></button>
+                  </div>
+                </sc-for>
+              </div>
+              <button onClick="{{ openAddContact }}" style="margin-top:12px;width:100%;height:42px;border:1.5px dashed var(--rp-orange-line);border-radius:12px;background:transparent;color:var(--rp-orange-2);font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer" style-hover="background:var(--rp-orange-tint)"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.8 19.5a5.2 5.2 0 0 1 10.4 0"/><path d="M18.5 8.5v5M16 11h5"/></svg>{{ addContactLabel }}</button>
+            </div>
+
+          </div>
+        </sc-if>
+
+        <!-- ACTIVITY -->
+        <sc-if value="{{ isActivity }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:4px 16px 0;display:flex;flex-direction:column;gap:12px">
+            <sc-if value="{{ noSecond }}">
+              <div style="background:#FEF4E6;border:1px solid #F4DCAF;border-radius:var(--r);padding:12px 13px;display:flex;align-items:center;gap:11px">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--warn)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 21.5 20H2.5L12 3.5Z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg>
+                <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:#8A5A15">Second contact is missing</div><div style="font-size:11.5px;color:#A9803A;margin-top:1px">Add a homeowner relative or co‑owner.</div></div>
+                <button onClick="{{ openAddContact }}" style="flex:none;height:32px;padding:0 13px;border:none;border-radius:9px;background:var(--warn);color:#fff;font-size:12px;font-weight:800;cursor:pointer">Add</button>
+              </div>
+            </sc-if>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--sh-1)">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px"><span style="font-size:12px;font-weight:800;letter-spacing:.3px;color:var(--faint);text-transform:uppercase">Tasks</span><span style="font-size:10px;font-weight:800;color:var(--rp-navy);background:var(--rp-navy-tint);padding:2px 8px;border-radius:999px">{{ openCount }} open</span></div>
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <sc-for list="{{ tasks }}" as="t" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:11px;padding:8px;border-radius:10px;background:{{ t.rowBg }};border:1px solid {{ t.rowBorder }}">
+                    <button onClick="{{ t.onToggle }}" style="flex:none;width:22px;height:22px;border-radius:7px;border:2px solid {{ t.boxBorder }};background:{{ t.boxBg }};display:flex;align-items:center;justify-content:center;cursor:pointer"><sc-if value="{{ t.done }}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4 10-11"/></svg></sc-if></button>
+                    <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:{{ t.titleColor }};text-decoration:{{ t.strike }}">{{ t.title }}</div><div style="font-size:11px;color:var(--muted);margin-top:1px">{{ t.due }}</div></div>
+                    <sc-if value="{{ t.fresh }}"><span style="flex:none;font-size:9px;font-weight:800;color:var(--rp-orange-2);background:var(--rp-orange-tint);padding:2px 7px;border-radius:6px;animation:pop .3s ease">NEW</span></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--sh-1)">
+              <div style="font-size:12px;font-weight:800;letter-spacing:.3px;color:var(--faint);text-transform:uppercase;margin-bottom:12px">Timeline</div>
+              <sc-for list="{{ feed }}" as="f" hint-placeholder-count="2">
+                <div style="display:flex;gap:11px;padding-bottom:13px">
+                  <div style="flex:none;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:9px;height:9px;border-radius:50%;background:{{ f.dot }};margin-top:3px"></div><div style="flex:1;width:2px;background:var(--border-2)"></div></div>
+                  <div style="flex:1;min-width:0"><div style="font-size:10px;font-weight:800;letter-spacing:.3px;color:var(--faint);text-transform:uppercase">{{ f.tag }}</div><div style="font-size:12.5px;line-height:1.45;margin-top:3px">{{ f.title }}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">{{ f.meta }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <div style="padding:12px 16px 0">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px;box-shadow:var(--sh-1)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <span style="font-size:12px;font-weight:800;letter-spacing:.3px;color:var(--faint);text-transform:uppercase">Damage photos</span>
+              <span style="font-size:11px;font-weight:700;color:var(--faint)">{{ photoCount }}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <sc-for list="{{ photos }}" as="p" hint-placeholder-count="4">
+                <div onMouseEnter="{{ p.onEnter }}" onMouseLeave="{{ p.onLeave }}" style="position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid var(--border-2)">
+                  <img src="{{ p.src }}" style="width:100%;height:100%;object-fit:cover;display:block">
+                  <sc-if value="{{ p.hovered }}">
+                    <div style="position:absolute;inset:0;background:rgba(20,26,34,.5);display:flex;align-items:center;justify-content:center;animation:fadeIn .15s ease">
+                      <button onClick="{{ p.onDelete }}" title="Delete photo" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--danger);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+              <button onClick="{{ uploadPhoto }}" style="aspect-ratio:4/3;border:1.5px dashed var(--rp-orange-line);border-radius:12px;background:var(--rp-orange-tint);color:var(--rp-orange-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer" style-hover="background:#FFE7DA">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                <span style="font-size:11px;font-weight:800">Upload</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div style="padding:14px 16px 0">
+          <button onClick="{{ openStageConfirm }}" style="width:100%;height:50px;border:none;border-radius:14px;background:var(--rp-orange);color:#fff;display:flex;align-items:center;gap:11px;padding:0 14px;cursor:pointer;text-align:left" style-hover="background:var(--rp-orange-2)">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12z"/></svg>
+            <span style="flex:1"><span style="display:block;font-size:9px;font-weight:800;letter-spacing:.6px;opacity:.85">NEXT ACTION</span><span style="display:block;font-size:14px;font-weight:800">Send the proposal</span></span>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- ===== BOTTOM ACTION BAR ===== -->
+  <sc-if value="{{ showJob }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;left:12px;right:12px;bottom:26px;height:66px;background:var(--rp-navy);border-radius:20px;box-shadow:var(--sh-3);display:flex;align-items:center;padding:0 6px;z-index:25">
+      <button onClick="{{ openNote }}" style="flex:1;height:100%;background:transparent;border:none;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer" style-hover="opacity:.75"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.5 9.5l-4-4L4 16z"/><path d="m13 6 4 4"/></svg><span style="font-size:10px;font-weight:700">Note</span></button>
+      <button onClick="{{ openTask }}" style="flex:1;height:100%;background:transparent;border:none;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer" style-hover="opacity:.75"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="m8.5 12 2.4 2.4L16 9.3"/></svg><span style="font-size:10px;font-weight:700">Task</span></button>
+      <button onClick="{{ openEmail }}" style="flex:1;height:100%;background:transparent;border:none;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer" style-hover="opacity:.75"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg><span style="font-size:10px;font-weight:700">Email</span></button>
+      <button onClick="{{ openMessage }}" style="flex:1;height:100%;background:transparent;border:none;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer" style-hover="opacity:.75"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.4 7.2L4 21l1.9-5.3A8 8 0 1 1 21 12Z"/></svg><span style="font-size:10px;font-weight:700">Message</span></button>
+    </div>
+  </sc-if>
+
+  <!-- ===== A toast ===== -->
+  <sc-if value="{{ toastShow }}">
+    <div style="position:absolute;left:50%;bottom:104px;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:9px;padding:11px 16px;border-radius:13px;background:var(--rp-navy);color:#fff;box-shadow:var(--sh-3);white-space:nowrap;animation:toastUp .3s ease">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#5FD898" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.6 2.6L16 9.4"/></svg>
+      <span style="font-size:13px;font-weight:700">{{ toastMsg }}</span>
+    </div>
+  </sc-if>
+
+  <!-- ===== LEAD CONFIRMATION LIGHTBOX ===== -->
+  <sc-if value="{{ leadSent }}">
+    <div style="position:absolute;inset:0;z-index:52;display:flex;align-items:center;justify-content:center;padding:28px;background:rgba(20,26,34,.5);animation:fadeIn .2s ease">
+      <div style="width:100%;background:var(--surface);border-radius:20px;padding:28px 22px 22px;text-align:center;box-shadow:var(--sh-3);animation:pop .3s ease">
+        <div style="width:64px;height:64px;border-radius:50%;background:var(--success-tint);display:flex;align-items:center;justify-content:center;margin:0 auto"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="var(--success)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.6 2.6L16 9.4"/></svg></div>
+        <div style="font-size:18px;font-weight:800;margin-top:16px">Status updated</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px">The job status has been sent to the next stage.</div>
+        <button onClick="{{ closeLeadConfirm }}" style="margin-top:20px;width:100%;height:48px;border:none;border-radius:13px;background:var(--rp-orange);color:#fff;font-size:15px;font-weight:800;cursor:pointer" style-hover="background:var(--rp-orange-2)">OK</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===== SAVE CONFIRM DIALOG ===== -->
+  <sc-if value="{{ saveConfirm }}">
+    <div style="position:absolute;inset:0;z-index:53;display:flex;align-items:center;justify-content:center;padding:28px;background:rgba(20,26,34,.5);animation:fadeIn .2s ease">
+      <div style="width:100%;background:var(--surface);border-radius:20px;padding:24px 22px 20px;box-shadow:var(--sh-3);animation:pop .3s ease">
+        <div style="font-size:17px;font-weight:800">Update lead?</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px">Are you sure you want to update this lead?</div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button onClick="{{ cancelSave }}" style="flex:1;height:48px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--rp-navy);font-size:14px;font-weight:700;cursor:pointer">Cancel</button>
+          <button onClick="{{ saveYes }}" style="flex:1;height:48px;border:none;border-radius:13px;background:var(--rp-orange);color:#fff;font-size:14px;font-weight:800;cursor:pointer" style-hover="background:var(--rp-orange-2)">Yes</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===== STAGE CONFIRM DIALOG ===== -->
+  <sc-if value="{{ stageConfirm }}">
+    <div style="position:absolute;inset:0;z-index:54;display:flex;align-items:center;justify-content:center;padding:28px;background:rgba(20,26,34,.5);animation:fadeIn .2s ease">
+      <div style="width:100%;background:var(--surface);border-radius:20px;padding:24px 22px 20px;box-shadow:var(--sh-3);animation:pop .3s ease">
+        <div style="font-size:17px;font-weight:800">Send to next stage?</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px">Are you sure you want to send the job status to the next stage?</div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button onClick="{{ cancelStage }}" style="flex:1;height:48px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--rp-navy);font-size:14px;font-weight:700;cursor:pointer">Cancel</button>
+          <button onClick="{{ confirmStage }}" style="flex:1;height:48px;border:none;border-radius:13px;background:var(--rp-orange);color:#fff;font-size:14px;font-weight:800;cursor:pointer" style-hover="background:var(--rp-orange-2)">Yes, send</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===== JOB OVERVIEW EDIT ===== -->
+  <sc-if value="{{ overviewEdit }}">
+    <div style="position:absolute;inset:0;z-index:54;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(20,26,34,.5);animation:fadeIn .2s ease">
+      <div style="width:100%;max-height:92%;overflow-y:auto;background:var(--surface);border-radius:20px;padding:22px 20px;box-shadow:var(--sh-3);animation:pop .3s ease">
+        <div style="font-size:17px;font-weight:800;margin-bottom:4px">Edit job overview</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Update the key figures for this job.</div>
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <div style="display:flex;gap:10px">
+            <div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">ESTIMATE</div><input value="{{ dvEstimate }}" onChange="{{ onOvEstimate }}" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)" style-focus="border-color:var(--rp-orange)"></div>
+            <div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">DEDUCTIBLE</div><input value="{{ dvDeductible }}" onChange="{{ onOvDeductible }}" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)" style-focus="border-color:var(--rp-orange)"></div>
+          </div>
+          <div><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">ROOF SIZE</div><input value="{{ dvRoof }}" onChange="{{ onOvRoof }}" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)" style-focus="border-color:var(--rp-orange)"></div>
+          <div><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">ROOF TYPE</div><input value="{{ dvRoofType }}" onChange="{{ onOvRoofType }}" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)" style-focus="border-color:var(--rp-orange)"></div>
+          <div style="display:flex;gap:10px">
+            <div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">INSURANCE</div><input value="{{ dvInsurance }}" onChange="{{ onOvInsurance }}" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text)" style-focus="border-color:var(--rp-orange)"></div>
+            <div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">CLAIM</div><input value="{{ dvClaim }}" onChange="{{ onOvClaim }}" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:11px;padding:0 12px;font-size:13.5px;font-weight:600;background:var(--surface-2);color:var(--text);font-family:var(--mono)" style-focus="border-color:var(--rp-orange)"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button onClick="{{ cancelOverviewEdit }}" style="flex:1;height:48px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--rp-navy);font-size:14px;font-weight:700;cursor:pointer">Cancel</button>
+          <button onClick="{{ updateOverview }}" style="flex:1;height:48px;border:none;border-radius:13px;background:var(--rp-orange);color:#fff;font-size:14px;font-weight:800;cursor:pointer" style-hover="background:var(--rp-orange-2)">Update</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===== SHEETS ===== -->
+  <sc-if value="{{ anySheet }}">
+    <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(20,26,34,.42);z-index:40;animation:fadeIn .2s ease"></div>
+  </sc-if>
+
+  <!-- edit sheet -->
+  <sc-if value="{{ sheetEdit }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;z-index:42;background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:10px 18px 30px;box-shadow:var(--sh-3);animation:sheetUp .32s cubic-bezier(.2,.8,.2,1)">
+      <div style="width:40px;height:5px;border-radius:3px;background:var(--border);margin:0 auto 16px"></div>
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px">Edit {{ editLabel }}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">This updates the field on Dana's job.</div>
+      <input value="{{ editValue }}" onChange="{{ onEditInput }}" style="width:100%;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:14px;font-weight:600;background:var(--surface-2)" style-focus="border-color:var(--rp-orange)">
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button onClick="{{ closeSheet }}" style="flex:1;height:48px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--rp-navy);font-size:14px;font-weight:700;cursor:pointer">Cancel</button>
+        <button onClick="{{ saveEdit }}" style="flex:2;height:48px;border:none;border-radius:13px;background:var(--rp-navy);color:#fff;font-size:14px;font-weight:800;cursor:pointer" style-hover="background:var(--rp-navy-2)">Save changes</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- add contact sheet -->
+  <sc-if value="{{ sheetContact }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;z-index:42;background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:10px 18px 30px;box-shadow:var(--sh-3);animation:sheetUp .32s cubic-bezier(.2,.8,.2,1)">
+      <div style="width:40px;height:5px;border-radius:3px;background:var(--border);margin:0 auto 16px"></div>
+      <div style="font-size:16px;font-weight:800">Add contact</div>
+      <div style="font-size:12px;color:var(--muted);margin:4px 0 16px">Second contact for this job — e.g. a homeowner relative.</div>
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <div><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">FULL NAME</div><input value="{{ cName }}" onChange="{{ onCName }}" style="width:100%;height:46px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:14px;font-weight:600;background:var(--surface-2)" style-focus="border-color:var(--rp-orange)"></div>
+        <div style="display:flex;gap:10px"><div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">RELATIONSHIP</div><input value="{{ cRel }}" onChange="{{ onCRel }}" style="width:100%;height:46px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:14px;font-weight:600;background:var(--surface-2)" style-focus="border-color:var(--rp-orange)"></div><div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">PHONE</div><input value="{{ cPhone }}" onChange="{{ onCPhone }}" style="width:100%;height:46px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:14px;font-weight:600;background:var(--surface-2)" style-focus="border-color:var(--rp-orange)"></div></div>
+        <div><div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">EMAIL</div><input value="{{ cEmail }}" onChange="{{ onCEmail }}" style="width:100%;height:46px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:14px;font-weight:600;background:var(--surface-2)" style-focus="border-color:var(--rp-orange)"></div>
+      </div>
+      <button onClick="{{ addSecond }}" style="margin-top:18px;width:100%;height:50px;border:none;border-radius:14px;background:var(--rp-orange);color:#fff;font-size:15px;font-weight:800;cursor:pointer" style-hover="background:var(--rp-orange-2)">Add contact</button>
+    </div>
+  </sc-if>
+
+  <!-- task sheet -->
+  <sc-if value="{{ sheetTask }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;z-index:42;background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:10px 18px 30px;box-shadow:var(--sh-3);animation:sheetUp .32s cubic-bezier(.2,.8,.2,1)">
+      <div style="width:40px;height:5px;border-radius:3px;background:var(--border);margin:0 auto 16px"></div>
+      <div style="font-size:16px;font-weight:800">New task</div>
+      <div style="font-size:12px;color:var(--muted);margin:4px 0 16px">Add a to‑do to Dana's job.</div>
+      <div style="font-size:11px;font-weight:700;color:var(--faint);margin-bottom:5px">TASK</div>
+      <input value="{{ taskTitle }}" onChange="{{ onTaskTitle }}" style="width:100%;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:14px;font-weight:600;background:var(--surface-2)" style-focus="border-color:var(--rp-orange)">
+      <div style="font-size:11px;font-weight:700;color:var(--faint);margin:15px 0 7px">DUE</div>
+      <div style="display:flex;gap:8px">
+        <button onClick="{{ setDueToday }}" style="flex:1;height:40px;border-radius:11px;font-size:12.5px;font-weight:700;cursor:pointer;border:1.5px solid {{ dueTodayBorder }};background:{{ dueTodayBg }};color:{{ dueTodayFg }}">Today</button>
+        <button onClick="{{ setDueTomorrow }}" style="flex:1;height:40px;border-radius:11px;font-size:12.5px;font-weight:700;cursor:pointer;border:1.5px solid {{ dueTomBorder }};background:{{ dueTomBg }};color:{{ dueTomFg }}">Tomorrow</button>
+        <button onClick="{{ setDueWeek }}" style="flex:1;height:40px;border-radius:11px;font-size:12.5px;font-weight:700;cursor:pointer;border:1.5px solid {{ dueWeekBorder }};background:{{ dueWeekBg }};color:{{ dueWeekFg }}">This week</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:15px;padding:11px 13px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface-2)">
+        <div style="width:30px;height:30px;border-radius:50%;background:var(--rp-navy);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">MW</div>
+        <div style="flex:1"><div style="font-size:12.5px;font-weight:700">Marcus Webb</div><div style="font-size:11px;color:var(--muted)">Assignee (you)</div></div>
+      </div>
+      <button onClick="{{ createTask }}" style="margin-top:18px;width:100%;height:50px;border:none;border-radius:14px;background:var(--rp-orange);color:#fff;font-size:15px;font-weight:800;cursor:pointer" style-hover="background:var(--rp-orange-2)">Create task</button>
+    </div>
+  </sc-if>
+
+  <!-- note sheet -->
+  <sc-if value="{{ sheetNote }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;z-index:42;background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:10px 18px 30px;box-shadow:var(--sh-3);animation:sheetUp .32s cubic-bezier(.2,.8,.2,1)">
+      <div style="width:40px;height:5px;border-radius:3px;background:var(--border);margin:0 auto 16px"></div>
+      <div style="font-size:16px;font-weight:800">Add note</div>
+      <div style="font-size:12px;color:var(--muted);margin:4px 0 14px">Logged to the job timeline.</div>
+      <textarea value="{{ noteText }}" onChange="{{ onNoteInput }}" placeholder="Type a note about this job…" style="width:100%;height:110px;border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;background:var(--surface-2);resize:none" style-focus="border-color:var(--rp-orange)"></textarea>
+      <button onClick="{{ addNoteAction }}" style="margin-top:16px;width:100%;height:50px;border:none;border-radius:14px;background:var(--rp-navy);color:#fff;font-size:15px;font-weight:800;cursor:pointer" style-hover="background:var(--rp-navy-2)">Save note</button>
+    </div>
+  </sc-if>
+
+  <!-- email sheet -->
+  <sc-if value="{{ sheetEmail }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;z-index:42;background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:10px 18px 30px;box-shadow:var(--sh-3);animation:sheetUp .32s cubic-bezier(.2,.8,.2,1)">
+      <div style="width:40px;height:5px;border-radius:3px;background:var(--border);margin:0 auto 16px"></div>
+      <div style="font-size:16px;font-weight:800">New email</div>
+      <div style="display:flex;align-items:center;gap:8px;margin:12px 0 12px;font-size:13px"><span style="color:var(--muted)">To</span><span style="font-weight:700">Dana Whitfield</span><span style="color:var(--faint);font-size:12px">&lt;dana.whitfield@gmail.com&gt;</span></div>
+      <input value="{{ emailSubject }}" onChange="{{ onEmailSubject }}" style="width:100%;height:46px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:14px;font-weight:600;background:var(--surface-2)" style-focus="border-color:var(--rp-orange)">
+      <textarea value="{{ emailBody }}" onChange="{{ onEmailBody }}" style="width:100%;height:120px;margin-top:10px;border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;background:var(--surface-2);resize:none" style-focus="border-color:var(--rp-orange)"></textarea>
+      <button onClick="{{ sendEmailAction }}" style="margin-top:16px;width:100%;height:50px;border:none;border-radius:14px;background:var(--rp-orange);color:#fff;font-size:15px;font-weight:800;cursor:pointer" style-hover="background:var(--rp-orange-2)">Send email</button>
+    </div>
+  </sc-if>
+
+  <!-- message sheet -->
+  <sc-if value="{{ sheetMessage }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;z-index:42;background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:10px 18px 30px;box-shadow:var(--sh-3);animation:sheetUp .32s cubic-bezier(.2,.8,.2,1)">
+      <div style="width:40px;height:5px;border-radius:3px;background:var(--border);margin:0 auto 16px"></div>
+      <div style="font-size:16px;font-weight:800">New message</div>
+      <div style="display:flex;align-items:center;gap:8px;margin:12px 0 12px;font-size:13px"><span style="color:var(--muted)">To</span><span style="font-weight:700">Dana Whitfield</span><span style="color:var(--faint);font-size:12px">(704) 555‑0148</span></div>
+      <textarea value="{{ msgText }}" onChange="{{ onMsgInput }}" style="width:100%;height:110px;border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;background:var(--surface-2);resize:none" style-focus="border-color:var(--rp-orange)"></textarea>
+      <button onClick="{{ sendMessageAction }}" style="margin-top:16px;width:100%;height:50px;border:none;border-radius:14px;background:var(--rp-orange);color:#fff;font-size:15px;font-weight:800;cursor:pointer" style-hover="background:var(--rp-orange-2)">Send message</button>
+    </div>
+  </sc-if>
+
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;402px&quot;,&quot;height&quot;:&quot;874px&quot;},&quot;variant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;'A' | 'B'&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'index', tab: 'activity', sheet: null, editKey: null,
+    editValue: '',
+    taskTitle: 'Call Dana to confirm color selection',
+    taskDue: 'Tomorrow',
+    noteText: '',
+    emailSubject: 'Your roof estimate — 2841 Oakmont Dr',
+    emailBody: 'Hi Dana,\n\nAttached is the estimate for the storm-damage repair on your roof. Let me know if you have any questions and we can get the proposal over for signature.\n\nThanks,\nMarcus',
+    msgText: 'Hi Dana — quick question about your shingle color choice. Free for a 5-min call today?',
+    cName: 'Renee Whitfield', cRel: 'Spouse', cPhone: '(704) 555-0192', cEmail: 'renee.whitfield@gmail.com',
+    hasSecond: false, freshTask: null,
+    openCats: { leads: true, estimating: true, sold: false, production: false, ar: false, completed: false, archive: false },
+    leadSent: false,
+    saveConfirm: false,
+    stageConfirm: false,
+    overviewEdit: false,
+    overviewDraft: {},
+    overview: { estimate: '$18,450', deductible: '$2,500', roof: '28 sq · 2,800 ft²', roofType: 'Architectural asphalt', insurance: 'State Farm', claim: 'SF-2291-0472' },
+    hoverPhoto: null,
+    photos: [
+      { id: 'p1', src: 'images/roof-01.jpg' },
+      { id: 'p2', src: 'images/roof-02.jpg' },
+      { id: 'p3', src: 'images/roof-03.jpg' },
+      { id: 'p4', src: 'images/roof-04.jpg' },
+    ],
+    fields: { roofType: 'Architectural asphalt', insurer: 'State Farm', claim: 'SF-2291-0472', deductible: '$2,500', size: '28 sq · 2,800 ft²', pitch: '6/12' },
+    contacts: [ { id: 'c1', name: 'Dana Whitfield', role: 'Homeowner', phone: '(704) 555-0148', email: 'dana.whitfield@gmail.com', primary: true } ],
+    tasks: [
+      { id: 't1', title: 'Upload adjuster scope of loss', due: 'Due Jul 12', assignee: 'Marcus Webb', done: false },
+      { id: 't2', title: 'Order shingle samples for Dana', due: 'Due Jul 9', assignee: 'Marcus Webb', done: false },
+    ],
+    feed: [
+      { id: 'f1', tag: 'Note', title: 'Homeowner confirmed shingles lifting on the south slope after the Jun 24 hail. Photos uploaded to RoofCam.', meta: 'Marcus Webb · Jul 2, 2:14 PM', dot: 'var(--rp-orange)' },
+      { id: 'f0', tag: 'System', title: 'Inspection completed — 28 squares measured, 6/12 pitch.', meta: 'Jul 2, 11:40 AM', dot: 'var(--info)' },
+    ],
+    toast: '', toastAt: 0, banner: '', bannerAt: 0,
+  };
+
+  labels = { roofType: 'roof type', insurer: 'insurance carrier', claim: 'claim number', deductible: 'deductible', size: 'roof size', pitch: 'pitch' };
+
+  confirm(msg) {
+    const now = Date.now();
+    if (this.props.variant === 'B') {
+      this.setState({ banner: msg, bannerAt: now });
+      setTimeout(() => { if (Date.now() - this.state.bannerAt >= 2600) this.setState({ banner: '' }); }, 2700);
+    } else {
+      this.setState({ toast: msg, toastAt: now });
+      setTimeout(() => { if (Date.now() - this.state.toastAt >= 2600) this.setState({ toast: '' }); }, 2700);
+    }
+  }
+
+  goHome = () => this.setState({ screen: 'index', sheet: null });
+  goJobs = () => this.setState({ screen: 'jobs', sheet: null });
+  goJob = () => this.setState({ screen: 'job', sheet: null });
+  goLead = () => this.setState({ screen: 'lead', sheet: null, leadSent: false });
+  sendToEstimation = () => this.setState({ leadSent: true });
+  closeLeadConfirm = () => this.setState({ leadSent: false, screen: 'jobs' });
+  openStageConfirm = () => this.setState({ stageConfirm: true });
+  cancelStage = () => this.setState({ stageConfirm: false });
+  confirmStage = () => this.setState({ stageConfirm: false, leadSent: true });
+  openOverviewEdit = () => this.setState({ overviewEdit: true, overviewDraft: { ...this.state.overview } });
+  cancelOverviewEdit = () => this.setState({ overviewEdit: false });
+  onOv(key, e) { this.setState({ overviewDraft: { ...this.state.overviewDraft, [key]: e.target.value } }); }
+  updateOverview = () => { this.setState({ overview: { ...this.state.overviewDraft }, overviewEdit: false, toast: 'Job overview updated', toastAt: Date.now() }); setTimeout(() => { if (Date.now() - this.state.toastAt >= 2400) this.setState({ toast: '' }); }, 2500); };
+  openSaveConfirm = () => this.setState({ saveConfirm: true });
+  cancelSave = () => this.setState({ saveConfirm: false });
+  saveYes = () => { this.setState({ saveConfirm: false, toast: 'Lead updated', toastAt: Date.now() }); setTimeout(() => { if (Date.now() - this.state.toastAt >= 2400) this.setState({ toast: '' }); }, 2500); };
+  setHover(id) { this.setState({ hoverPhoto: id }); }
+  clearHover = () => this.setState({ hoverPhoto: null });
+  deletePhoto(id) { this.setState({ photos: this.state.photos.filter(p => p.id !== id), hoverPhoto: null }); }
+  uploadPhoto = () => { this.setState({ toast: 'Photo added', toastAt: Date.now() }); setTimeout(() => { if (Date.now() - this.state.toastAt >= 2400) this.setState({ toast: '' }); }, 2500); };
+  toggleCat(key) { this.setState({ openCats: { ...this.state.openCats, [key]: !this.state.openCats[key] } }); }
+  setOverview = () => this.setState({ tab: 'overview' });
+  setActivity = () => this.setState({ tab: 'activity' });
+
+  open(kind) { this.setState({ sheet: kind }); }
+  closeSheet = () => this.setState({ sheet: null });
+  openAddContact = () => this.setState({ sheet: 'contact' });
+  openNote = () => this.setState({ sheet: 'note' });
+  openTask = () => this.setState({ sheet: 'task' });
+  openEmail = () => this.setState({ sheet: 'email' });
+  openMessage = () => this.setState({ sheet: 'message' });
+
+  openEdit(key) { this.setState({ sheet: 'edit', editKey: key, editValue: this.state.fields[key] }); }
+  onEditInput = (e) => this.setState({ editValue: e.target.value });
+  saveEdit = () => {
+    const key = this.state.editKey;
+    const fields = { ...this.state.fields, [key]: this.state.editValue };
+    this.setState({ fields, sheet: null });
+    this.confirm('Updated ' + this.labels[key]);
+  };
+
+  addSecond = () => {
+    if (this.state.hasSecond) { this.setState({ sheet: null }); return; }
+    const c2 = { id: 'c2', name: this.state.cName, role: this.state.cRel, phone: this.state.cPhone, email: this.state.cEmail, primary: false };
+    this.setState({ contacts: [...this.state.contacts, c2], hasSecond: true, sheet: null });
+    this.confirm('Contact added — ' + this.state.cName);
+  };
+
+  createTask = () => {
+    const map = { 'Today': 'Due today', 'Tomorrow': 'Due tomorrow', 'This week': 'Due this week' };
+    const id = 'nt' + Date.now();
+    const task = { id, title: this.state.taskTitle, due: map[this.state.taskDue] || 'Due soon', assignee: 'Marcus Webb', done: false };
+    this.setState({ tasks: [task, ...this.state.tasks], freshTask: id, sheet: null, tab: 'activity' });
+    this.confirm('Task created');
+    setTimeout(() => { if (this.state.freshTask === id) this.setState({ freshTask: null }); }, 3200);
+  };
+
+  addNoteAction = () => {
+    const t = (this.state.noteText || '').trim();
+    if (!t) { this.setState({ sheet: null }); return; }
+    const f = { id: 'nn' + Date.now(), tag: 'Note', title: t, meta: 'Marcus Webb · Just now', dot: 'var(--rp-orange)' };
+    this.setState({ feed: [f, ...this.state.feed], noteText: '', sheet: null });
+    this.confirm('Note saved');
+  };
+  sendEmailAction = () => {
+    const f = { id: 'ne' + Date.now(), tag: 'Email', title: 'Email sent — ' + this.state.emailSubject, meta: 'Marcus Webb · Just now', dot: 'var(--info)' };
+    this.setState({ feed: [f, ...this.state.feed], sheet: null });
+    this.confirm('Email sent to Dana');
+  };
+  sendMessageAction = () => {
+    const f = { id: 'nm' + Date.now(), tag: 'Message', title: 'Text sent to Dana Whitfield.', meta: 'Marcus Webb · Just now', dot: 'var(--success)' };
+    this.setState({ feed: [f, ...this.state.feed], sheet: null });
+    this.confirm('Message sent');
+  };
+  onNext = () => this.confirm('Opening proposal builder…');
+  onViewEstimate = () => this.confirm('Opening estimate…');
+
+  toggleTask(id) {
+    this.setState({ tasks: this.state.tasks.map(t => t.id === id ? { ...t, done: !t.done } : t) });
+  }
+  call(name) { this.confirm('Calling ' + name + '…'); }
+
+  onTaskTitle = (e) => this.setState({ taskTitle: e.target.value });
+  onNoteInput = (e) => this.setState({ noteText: e.target.value });
+  onEmailSubject = (e) => this.setState({ emailSubject: e.target.value });
+  onEmailBody = (e) => this.setState({ emailBody: e.target.value });
+  onMsgInput = (e) => this.setState({ msgText: e.target.value });
+  onCName = (e) => this.setState({ cName: e.target.value });
+  onCRel = (e) => this.setState({ cRel: e.target.value });
+  onCPhone = (e) => this.setState({ cPhone: e.target.value });
+  onCEmail = (e) => this.setState({ cEmail: e.target.value });
+  setDueToday = () => this.setState({ taskDue: 'Today' });
+  setDueTomorrow = () => this.setState({ taskDue: 'Tomorrow' });
+  setDueWeek = () => this.setState({ taskDue: 'This week' });
+
+  initials(name) { return (name || '').trim().split(/\s+/).map(w => w[0] || '').slice(0, 2).join('').toUpperCase(); }
+
+  renderVals() {
+    const s = this.state;
+    const isA = this.props.variant !== 'B';
+    const isB = this.props.variant === 'B';
+    const showJob = s.screen === 'job';
+    const showJobs = s.screen === 'jobs';
+    const showIndex = s.screen === 'index';
+    const showLead = s.screen === 'lead';
+    const cats = s.openCats;
+    const caret = (o) => o ? '90deg' : '0deg';
+    const openCount = s.tasks.filter(t => !t.done).length;
+
+    const contacts = s.contacts.map(c => ({
+      ...c,
+      initials: this.initials(c.name),
+      tintBg: c.primary ? 'var(--rp-orange-tint)' : 'var(--rp-navy-tint)',
+      tintFg: c.primary ? 'var(--rp-orange-2)' : 'var(--rp-navy)',
+      onCall: () => this.call(c.name),
+      onText: () => this.openMessage(),
+    }));
+
+    const tasks = s.tasks.map(t => ({
+      ...t,
+      fresh: t.id === s.freshTask,
+      strike: t.done ? 'line-through' : 'none',
+      titleColor: t.done ? 'var(--faint)' : 'var(--text)',
+      boxBg: t.done ? 'var(--success)' : 'var(--surface)',
+      boxBorder: t.done ? 'var(--success)' : 'var(--border)',
+      rowBg: t.id === s.freshTask ? 'var(--rp-orange-tint)' : 'transparent',
+      rowBorder: t.id === s.freshTask ? 'var(--rp-orange-line)' : 'transparent',
+      onToggle: () => this.toggleTask(t.id),
+    }));
+
+    const seg = (on) => ({
+      bg: on ? 'var(--surface)' : 'transparent',
+      fg: on ? 'var(--rp-navy)' : 'var(--muted)',
+      sh: on ? 'var(--sh-1)' : 'none',
+    });
+    const ov = seg(s.tab === 'overview');
+    const ac = seg(s.tab === 'activity');
+
+    const due = (on) => ({
+      border: on ? 'var(--rp-orange)' : 'var(--border)',
+      bg: on ? 'var(--rp-orange-tint)' : 'var(--surface-2)',
+      fg: on ? 'var(--rp-orange-2)' : 'var(--muted)',
+    });
+    const dT = due(s.taskDue === 'Today');
+    const dTom = due(s.taskDue === 'Tomorrow');
+    const dW = due(s.taskDue === 'This week');
+
+    return {
+      isA, isB, showJob, showIndex,
+      showJobA: showJob && isA, showJobB: showJob && isB,
+      crumbLeaf: 'Whitfield',
+      showJobs, notIndex: showJob || showJobs || showLead, showLead, showLeaf: showJob || showLead,
+      goJobs: this.goJobs, goLead: this.goLead,
+      leadSent: s.leadSent, sendToEstimation: this.sendToEstimation, closeLeadConfirm: this.closeLeadConfirm,
+      stageConfirm: s.stageConfirm, openStageConfirm: this.openStageConfirm, cancelStage: this.cancelStage, confirmStage: this.confirmStage,
+      overviewEdit: s.overviewEdit, openOverviewEdit: this.openOverviewEdit, cancelOverviewEdit: this.cancelOverviewEdit, updateOverview: this.updateOverview,
+      ovEstimate: s.overview.estimate, ovDeductible: s.overview.deductible, ovRoof: s.overview.roof, ovRoofType: s.overview.roofType, ovInsurance: s.overview.insurance, ovClaim: s.overview.claim,
+      dvEstimate: s.overviewDraft.estimate, dvDeductible: s.overviewDraft.deductible, dvRoof: s.overviewDraft.roof, dvRoofType: s.overviewDraft.roofType, dvInsurance: s.overviewDraft.insurance, dvClaim: s.overviewDraft.claim,
+      onOvEstimate: (e) => this.onOv('estimate', e), onOvDeductible: (e) => this.onOv('deductible', e), onOvRoof: (e) => this.onOv('roof', e), onOvRoofType: (e) => this.onOv('roofType', e), onOvInsurance: (e) => this.onOv('insurance', e), onOvClaim: (e) => this.onOv('claim', e),
+      saveConfirm: s.saveConfirm, openSaveConfirm: this.openSaveConfirm, cancelSave: this.cancelSave, saveYes: this.saveYes,
+      photos: s.photos.map(p => ({ ...p, hovered: s.hoverPhoto === p.id, onEnter: () => this.setHover(p.id), onLeave: this.clearHover, onDelete: () => this.deletePhoto(p.id) })),
+      photoCount: s.photos.length, uploadPhoto: this.uploadPhoto,
+      homeColor: showIndex ? 'var(--text)' : 'var(--muted)',
+      homeWeight: showIndex ? 800 : 600,
+      jobsColor: showJobs ? 'var(--text)' : 'var(--muted)',
+      jobsWeight: showJobs ? 800 : 600,
+      leadsOpen: cats.leads, leadsCaret: caret(cats.leads), toggleLeads: () => this.toggleCat('leads'),
+      estimatingOpen: cats.estimating, estimatingCaret: caret(cats.estimating), toggleEstimating: () => this.toggleCat('estimating'),
+      soldOpen: cats.sold, soldCaret: caret(cats.sold), toggleSold: () => this.toggleCat('sold'),
+      productionOpen: cats.production, productionCaret: caret(cats.production), toggleProduction: () => this.toggleCat('production'),
+      arOpen: cats.ar, arCaret: caret(cats.ar), toggleAr: () => this.toggleCat('ar'),
+      completedOpen: cats.completed, completedCaret: caret(cats.completed), toggleCompleted: () => this.toggleCat('completed'),
+      archiveOpen: cats.archive, archiveCaret: caret(cats.archive), toggleArchive: () => this.toggleCat('archive'),
+      variantTitle: isB ? 'Direction B · Focus dashboard' : 'Direction A · Guided cards',
+      variantBlurb: isB ? 'A dense command view — navy summary, next action up top, tabs to cut the clutter.' : 'A calm vertical stack — stage tracker, one clear next step, everything a tap away.',
+      contactCount: s.contacts.length === 1 ? '1 contact' : s.contacts.length + ' contacts',
+      addContactLabel: s.hasSecond ? 'Add another contact' : 'Add second contact',
+      contacts, tasks, feed: s.feed, openCount, noSecond: !s.hasSecond,
+      roofTypeVal: s.fields.roofType, insurerVal: s.fields.insurer, claimVal: s.fields.claim,
+      deductibleVal: s.fields.deductible, sizeVal: s.fields.size, pitchVal: s.fields.pitch,
+      editRoofType: () => this.openEdit('roofType'),
+      editInsurer: () => this.openEdit('insurer'),
+      editClaim: () => this.openEdit('claim'),
+      editDeductible: () => this.openEdit('deductible'),
+      editSize: () => this.openEdit('size'),
+      editPitch: () => this.openEdit('pitch'),
+      editLabel: s.editKey ? this.labels[s.editKey] : '',
+      editValue: s.editValue, onEditInput: this.onEditInput, saveEdit: this.saveEdit,
+      goHome: this.goHome, goJob: this.goJob,
+      setOverview: this.setOverview, setActivity: this.setActivity,
+      isOverview: s.tab === 'overview', isActivity: s.tab === 'activity',
+      tabOverviewBg: ov.bg, tabOverviewFg: ov.fg, tabOverviewSh: ov.sh,
+      tabActivityBg: ac.bg, tabActivityFg: ac.fg, tabActivitySh: ac.sh,
+      openAddContact: this.openAddContact, openNote: this.openNote, openTask: this.openTask,
+      openEmail: this.openEmail, openMessage: this.openMessage, closeSheet: this.closeSheet,
+      onNext: this.onNext, onViewEstimate: this.onViewEstimate,
+      addSecond: this.addSecond, createTask: this.createTask, addNoteAction: this.addNoteAction,
+      sendEmailAction: this.sendEmailAction, sendMessageAction: this.sendMessageAction,
+      anySheet: s.sheet !== null,
+      sheetEdit: s.sheet === 'edit', sheetContact: s.sheet === 'contact', sheetTask: s.sheet === 'task',
+      sheetNote: s.sheet === 'note', sheetEmail: s.sheet === 'email', sheetMessage: s.sheet === 'message',
+      taskTitle: s.taskTitle, onTaskTitle: this.onTaskTitle,
+      noteText: s.noteText, onNoteInput: this.onNoteInput,
+      emailSubject: s.emailSubject, onEmailSubject: this.onEmailSubject,
+      emailBody: s.emailBody, onEmailBody: this.onEmailBody,
+      msgText: s.msgText, onMsgInput: this.onMsgInput,
+      cName: s.cName, onCName: this.onCName, cRel: s.cRel, onCRel: this.onCRel,
+      cPhone: s.cPhone, onCPhone: this.onCPhone, cEmail: s.cEmail, onCEmail: this.onCEmail,
+      setDueToday: this.setDueToday, setDueTomorrow: this.setDueTomorrow, setDueWeek: this.setDueWeek,
+      dueTodayBorder: dT.border, dueTodayBg: dT.bg, dueTodayFg: dT.fg,
+      dueTomBorder: dTom.border, dueTomBg: dTom.bg, dueTomFg: dTom.fg,
+      dueWeekBorder: dW.border, dueWeekBg: dW.bg, dueWeekFg: dW.fg,
+      toastShow: !!s.toast, toastMsg: s.toast,
+      bannerShow: !!s.banner, bannerMsg: s.banner,
+    };
+  }
+}
+</script>
+</body>
+</html>
